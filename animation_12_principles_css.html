@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アニメーションの12原則 - CSSアニメーション実装</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .principle {
+            margin-bottom: 60px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .principle h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .principle-subtitle {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            margin-bottom: 20px;
+            color: #34495e;
+        }
+
+        .demo-area {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 1. スクアッシュ&ストレッチ */
+        .squash-stretch {
+            width: 60px;
+            height: 60px;
+            background: #e74c3c;
+            border-radius: 50%;
+            animation: squashStretch 2s ease-in-out infinite;
+        }
+
+        @keyframes squashStretch {
+            0%, 100% { transform: scale(1, 1); }
+            25% { transform: scale(1.3, 0.7); }
+            50% { transform: scale(0.8, 1.2); }
+            75% { transform: scale(1.2, 0.8); }
+        }
+
+        /* 2. 予備動作 */
+        .anticipation {
+            width: 50px;
+            height: 50px;
+            background: #3498db;
+            border-radius: 50%;
+            position: relative;
+            animation: anticipationMove 3s ease-in-out infinite;
+        }
+
+        @keyframes anticipationMove {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-20px) scale(0.9); }
+            30% { transform: translateX(150px) scale(1.1); }
+            80% { transform: translateX(150px); }
+        }
+
+        /* 3. 演出 */
+        .staging {
+            position: relative;
+            width: 100%;
+            height: 80px;
+        }
+
+        .staging-spotlight {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 0, 0.3) 0%, transparent 70%);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: spotlight 4s ease-in-out infinite;
+        }
+
+        .staging-character {
+            width: 40px;
+            height: 40px;
+            background: #9b59b6;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: stagingPerform 4s ease-in-out infinite;
+        }
+
+        @keyframes spotlight {
+            0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1); }
+            50% { opacity: 0.8; transform: translateX(-50%) scale(1.2); }
+        }
+
+        @keyframes stagingPerform {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+        }
+
+        /* 4. ストレートアヘッド・ポーズトゥポーズ */
+        .straight-ahead {
+            display: flex;
+            gap: 30px;
+        }
+
+        .straight {
+            width: 30px;
+            height: 30px;
+            background: #e67e22;
+            border-radius: 50%;
+            animation: straightPath 3s linear infinite;
+        }
+
+        .pose-to-pose {
+            width: 30px;
+            height: 30px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: poseToPath 3s ease-in-out infinite;
+        }
+
+        @keyframes straightPath {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(60px); }
+        }
+
+        @keyframes poseToPath {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(15px); }
+            50% { transform: translateY(30px); }
+            75% { transform: translateY(45px); }
+        }
+
+        /* 5. フォロースルー・オーバーラップ */
+        .follow-through {
+            display: flex;
+            gap: 10px;
+        }
+
+        .leader {
+            width: 40px;
+            height: 40px;
+            background: #27ae60;
+            border-radius: 50%;
+            animation: leaderMove 3s ease-in-out infinite;
+        }
+
+        .follower {
+            width: 35px;
+            height: 35px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: followerMove 3s ease-in-out infinite 0.2s;
+        }
+
+        .follower2 {
+            width: 30px;
+            height: 30px;
+            background: #58d68d;
+            border-radius: 50%;
+            animation: followerMove 3s ease-in-out infinite 0.4s;
+        }
+
+        @keyframes leaderMove {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(100px); }
+        }
+
+        @keyframes followerMove {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(80px); }
+        }
+
+        /* 6. スローイン・スローアウト */
+        .slow-in-out {
+            width: 50px;
+            height: 50px;
+            background: #8e44ad;
+            border-radius: 50%;
+            animation: slowInOut 4s ease-in-out infinite;
+        }
+
+        @keyframes slowInOut {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(200px); }
+        }
+
+        /* 7. 運動曲線 */
+        .arc-motion {
+            width: 40px;
+            height: 40px;
+            background: #e91e63;
+            border-radius: 50%;
+            animation: arcPath 3s ease-in-out infinite;
+        }
+
+        @keyframes arcPath {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(50px, -30px); }
+            50% { transform: translate(100px, -50px); }
+            75% { transform: translate(150px, -30px); }
+        }
+
+        /* 8. 副次アクション */
+        .secondary-action {
+            position: relative;
+        }
+
+        .main-action {
+            width: 50px;
+            height: 50px;
+            background: #ff5722;
+            border-radius: 50%;
+            animation: mainBounce 2s ease-in-out infinite;
+        }
+
+        .secondary {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: #ff9800;
+            border-radius: 50%;
+            animation: secondaryFloat 2s ease-in-out infinite 0.1s;
+        }
+
+        @keyframes mainBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-40px); }
+        }
+
+        @keyframes secondaryFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 9. タイミング */
+        .timing-demo {
+            display: flex;
+            gap: 30px;
+        }
+
+        .fast-timing {
+            width: 35px;
+            height: 35px;
+            background: #f44336;
+            border-radius: 50%;
+            animation: fastMove 1s linear infinite;
+        }
+
+        .slow-timing {
+            width: 35px;
+            height: 35px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: slowMove 4s ease-in-out infinite;
+        }
+
+        @keyframes fastMove {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        @keyframes slowMove {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+        }
+
+        /* 10. 誇張 */
+        .exaggeration {
+            width: 60px;
+            height: 60px;
+            background: #607d8b;
+            border-radius: 50%;
+            animation: exaggeratedBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes exaggeratedBounce {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(2) translateY(-50px); }
+        }
+
+        /* 11. 立体感のある絵 */
+        .solid-drawing {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #795548 0%, #d7ccc8 50%, #795548 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            animation: solidRotate 4s ease-in-out infinite;
+        }
+
+        @keyframes solidRotate {
+            0%, 100% { transform: rotateY(0deg) rotateX(0deg); }
+            25% { transform: rotateY(90deg) rotateX(15deg); }
+            50% { transform: rotateY(180deg) rotateX(0deg); }
+            75% { transform: rotateY(270deg) rotateX(-15deg); }
+        }
+
+        /* 12. アピール */
+        .appeal {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 50%;
+            position: relative;
+            animation: appealPulse 2s ease-in-out infinite;
+        }
+
+        .appeal::before {
+            content: '✨';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes appealPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+            50% { transform: scale(1.2); box-shadow: 0 0 40px rgba(78, 205, 196, 0.8); }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) rotate(180deg); }
+        }
+
+        .code-section {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+
+        .code-section pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>アニメーションの12原則 - CSSアニメーション実装</h1>
+
+        <div class="principle">
+            <h2>1. スクアッシュ&ストレッチ (Squash and Stretch)</h2>
+            <p class="principle-subtitle">物体の重量感や柔軟性を表現</p>
+            <p class="description">オブジェクトが動く際の圧縮と伸長により、重量感と生命感を表現します。</p>
+            <div class="demo-area">
+                <div class="squash-stretch"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>2. 予備動作 (Anticipation)</h2>
+            <p class="principle-subtitle">メインアクションの前の準備動作</p>
+            <p class="description">大きな動作の前に、逆方向への小さな動きで次の動作を予告します。</p>
+            <div class="demo-area">
+                <div class="anticipation"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>3. 演出 (Staging)</h2>
+            <p class="principle-subtitle">見せたいものを明確に伝える</p>
+            <p class="description">重要な要素を際立たせ、観客の注意を適切に誘導します。</p>
+            <div class="demo-area">
+                <div class="staging">
+                    <div class="staging-spotlight"></div>
+                    <div class="staging-character"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>4. ストレートアヘッド・ポーズトゥポーズ (Straight Ahead Action and Pose to Pose)</h2>
+            <p class="principle-subtitle">アニメーション制作の2つのアプローチ</p>
+            <p class="description">ストレートアヘッド（流れるような自然な動き）とポーズトゥポーズ（キーポーズ間の計算された動き）の比較。</p>
+            <div class="demo-area">
+                <div class="straight-ahead">
+                    <div class="straight"></div>
+                    <div class="pose-to-pose"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>5. フォロースルー・オーバーラップ (Follow Through and Overlapping Action)</h2>
+            <p class="principle-subtitle">連続する動作と重複する動作</p>
+            <p class="description">体の各部分が異なるタイミングで動き、自然な慣性を表現します。</p>
+            <div class="demo-area">
+                <div class="follow-through">
+                    <div class="leader"></div>
+                    <div class="follower"></div>
+                    <div class="follower2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>6. スローイン・スローアウト (Slow In and Slow Out)</h2>
+            <p class="principle-subtitle">動作の始まりと終わりを滑らかに</p>
+            <p class="description">動作の開始時と終了時に緩やかな変化を加えることで、自然な動きを実現します。</p>
+            <div class="demo-area">
+                <div class="slow-in-out"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>7. 運動曲線 (Arc)</h2>
+            <p class="principle-subtitle">自然な弧を描く動き</p>
+            <p class="description">生物の動作は直線ではなく弧を描きます。より自然で魅力的な動きを作ります。</p>
+            <div class="demo-area">
+                <div class="arc-motion"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>8. 副次アクション (Secondary Action)</h2>
+            <p class="principle-subtitle">メインアクションを補強する動作</p>
+            <p class="description">主要な動作を補完し、キャラクターの個性や状況をより豊かに表現します。</p>
+            <div class="demo-area">
+                <div class="secondary-action">
+                    <div class="main-action"></div>
+                    <div class="secondary"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>9. タイミング (Timing)</h2>
+            <p class="principle-subtitle">動作の速度と間</p>
+            <p class="description">動作の速度により、重量感や感情、性格を表現します。</p>
+            <div class="demo-area">
+                <div class="timing-demo">
+                    <div class="fast-timing"></div>
+                    <div class="slow-timing"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>10. 誇張 (Exaggeration)</h2>
+            <p class="principle-subtitle">現実以上の表現で魅力的に</p>
+            <p class="description">現実的すぎず、かといって非現実的すぎない適度な誇張により表現力を高めます。</p>
+            <div class="demo-area">
+                <div class="exaggeration"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>11. 立体感のある絵 (Solid Drawing)</h2>
+            <p class="principle-subtitle">3次元空間での重量感</p>
+            <p class="description">フォルム、重量、バランスを意識した立体的な描画により説得力を生みます。</p>
+            <div class="demo-area">
+                <div class="solid-drawing"></div>
+            </div>
+        </div>
+
+        <div class="principle">
+            <h2>12. アピール (Appeal)</h2>
+            <p class="principle-subtitle">魅力的で印象的な表現</p>
+            <p class="description">観客を惹きつける魅力や個性、カリスマ性を表現します。</p>
+            <div class="demo-area">
+                <div class="appeal"></div>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <h3>🚀 GitHub Gist用のコードサンプル</h3>
+            <pre>
+/* アニメーションの12原則 - CSSアニメーション実装例 */
+
+/* 1. スクアッシュ&ストレッチ */
+@keyframes squashStretch {
+    0%, 100% { transform: scale(1, 1); }
+    25% { transform: scale(1.3, 0.7); }
+    50% { transform: scale(0.8, 1.2); }
+    75% { transform: scale(1.2, 0.8); }
+}
+
+/* 2. 予備動作 */
+@keyframes anticipationMove {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-20px) scale(0.9); }
+    30% { transform: translateX(150px) scale(1.1); }
+    80% { transform: translateX(150px); }
+}
+
+/* 6. スローイン・スローアウト */
+.slow-in-out {
+    animation: slowInOut 4s ease-in-out infinite;
+}
+
+@keyframes slowInOut {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(200px); }
+}
+
+/* 使用方法 */
+.element {
+    animation-name: squashStretch;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+            </pre>
+        </div>
+
+        <div style="margin-top: 40px; text-align: center; color: #7f8c8d;">
+            <p>📚 これらの原則はWalt DisneyのOllie JohnstonとFrank Thomasによって「The Illusion of Life」で体系化されました。</p>
+            <p>💡 各原則をCSSアニメーションで実装することで、ウェブ上でも魅力的なアニメーションが作成できます。</p>
+        </div>
+    </div>
+</body>
+</html>
