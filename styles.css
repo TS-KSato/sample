@@ -1,100 +1,54 @@
-/* 法対応メモ（実装者向けコメント）
-  - 消費者契約法の観点：短時間で完了できるよう、視線移動・タップ数を最小化する簡素レイアウト。
-  - 個人情報保護法の観点：必要最小限の入力欄に限定。説明は読みやすい階層・余白で表示。
-*/
+/* 消費者契約法: 2分以内で完了できる簡素UI。個人情報保護法: 必要最小限項目＋明示。 */
 
-/* ベース */
 :root {
-  --bg: #ffffff;
-  --fg: #111111;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --warn: #ff0000;
-  --primary: #007bff;
-  --focus: #2563eb;
+  --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --warn:#ff0000; --primary:#007bff; --focus:#2563eb;
 }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.6}
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 
-/* 可視テキスト外の見出し（アクセシビリティ） */
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0, 0, 0, 0); border: 0;
+.container{max-width:720px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.notice{margin-bottom:8px}
+.warn{color:var(--warn);font-size:16px}
+
+.field{display:block;margin:12px 0}
+.field>span{display:inline-block;margin-bottom:6px;font-weight:600}
+.req{background:#fee2e2;color:#991b1b;font-size:12px;border-radius:4px;padding:2px 6px;margin-left:6px}
+
+input[type="text"],input[type="email"],input[type="tel"],select{
+  width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px
 }
+input:focus,select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
 
-.container {
-  max-width: 720px; margin: 0 auto; padding: 16px;
-}
+.hint{color:var(--muted);font-size:12px;display:block;margin-top:4px}
+.error{color:#b91c1c;font-size:12px;min-height:16px;display:block;margin-top:4px}
 
-.card {
-  background: #fff; border: 1px solid var(--border); border-radius: 12px;
-  padding: 16px; margin: 12px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-}
+.option{display:block;margin:6px 0}
+.option input{margin-right:6px}
 
-.notice { margin-bottom: 8px; }
-.warn { color: var(--warn); font-size: 16px; }
+.tabs{display:flex;gap:8px;margin-bottom:8px}
+.tab{padding:8px 12px;border:1px solid var(--border);background:#f9fafb;border-radius:20px;cursor:pointer}
+.tab.active{border-color:var(--primary);background:#eef6ff}
+.tabpane{padding:8px 0}
+.tabpane[hidden]{display:none}
+.tabpane.active{display:block}
 
-.field { display: block; margin: 12px 0; }
-.field > span { display: inline-block; margin-bottom: 6px; font-weight: 600; }
+.subfield{display:block;margin:8px 0}
+.subfield span{display:inline-block;margin-bottom:6px}
 
-.req {
-  background: #fee2e2; color: #991b1b; font-size: 12px; border-radius: 4px; padding: 2px 6px; margin-left: 6px;
-}
+.agree{display:flex;align-items:flex-start;gap:8px;margin-top:12px}
+.agree input{margin-top:3px}
 
-input[type="text"], input[type="email"], input[type="tel"], select {
-  width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
-}
+.actions{display:flex;align-items:center;gap:12px;margin-top:12px}
+button[type="submit"]{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;transition:transform .02s ease}
+button[disabled]{opacity:.5;cursor:not-allowed}
+button:active{transform:translateY(1px)}
+.submit-note{font-size:12px;color:var(--muted)}
 
-input:focus, select:focus {
-  outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
-}
+.privacy{color:#4b5563;font-size:12px;line-height:1.7}
+.footer{text-align:center;color:var(--muted);font-size:12px;padding:16px 0 8px}
 
-.hint { color: var(--muted); font-size: 12px; display: block; margin-top: 4px; }
-
-.error { color: #b91c1c; font-size: 12px; min-height: 16px; display: block; margin-top: 4px; }
-
-/* ラジオ/チェックの見やすさ */
-.option { display: block; margin: 6px 0; }
-.option input { margin-right: 6px; }
-
-.tabs { display: flex; gap: 8px; margin-bottom: 8px; }
-.tab {
-  padding: 8px 12px; border: 1px solid var(--border); background: #f9fafb; border-radius: 20px; cursor: pointer;
-}
-.tab.active { border-color: var(--primary); background: #eef6ff; }
-
-.tabpane { padding: 8px 0; }
-.tabpane[hidden] { display: none; }
-.tabpane.active { display: block; }
-
-.subfield { display: block; margin: 8px 0; }
-.subfield span { display: inline-block; margin-bottom: 6px; }
-
-.agree { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; }
-.agree input { margin-top: 3px; }
-
-.actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-
-button[type="submit"] {
-  background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 10px 16px;
-  font-size: 14px; cursor: pointer; transition: transform .02s ease;
-}
-button[disabled] { opacity: .5; cursor: not-allowed; }
-button:active { transform: translateY(1px); }
-
-.submit-note { font-size: 12px; color: var(--muted); }
-
-.privacy {
-  color: #4b5563; font-size: 12px; line-height: 1.7;
-}
-
-.footer {
-  text-align: center; color: var(--muted); font-size: 12px; padding: 16px 0 8px;
-}
-
-/* レスポンシブ（320〜1200px想定。今回はモバイル優先のため最小限） */
-@media (min-width: 768px) {
-  .actions { justify-content: flex-start; }
-}
+@media (min-width:768px){.actions{justify-content:flex-start}}

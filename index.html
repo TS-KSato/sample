@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>未成年返金申請フォーム | refund.example.com</title>
-  <!-- 法対応メモ（表示対象外の実装者向けコメント）
-    - 個人情報保護法: 収集目的・保管期間・第三者提供の可能性を明示（本文下部に表示）。
-    - 消費者契約法: フォームは簡潔・短時間（2分以内）で完結するUI。
-    - 刑法246条（詐欺罪）: 抑止目的の注意喚起は赤字で明確化。ただし過度に脅迫的にならないよう文面は節度を保持。
-    - 資金決済法: キャリア決済の検証のため、取引ID/ユーザーID欄を必須化。
+  <!-- 法対応メモ（実装者向け）
+    - 個人情報保護法: 収集目的/保管期間/第三者提供を本文で明示。入力は最小限。
+    - 消費者契約法: 簡潔UI（2分以内完了想定）。
+    - 刑法246条: 抑止のため注意喚起を冒頭に明示、過度に脅迫的な表現は避ける。
+    - 資金決済法: キャリア決済の検証用に「対象ドメイン」「キャリア」「対象の決済番号」を必須化。
   -->
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -18,41 +18,63 @@
 
     <section class="card">
       <div class="notice" role="note" aria-live="polite">
-        <!-- 抑止目的の注意喚起（刑法246条の趣旨を簡潔に明示）。脅迫的表現は避ける。 -->
         <strong class="warn">
           虚偽の未成年返金請求は詐欺罪（刑法246条）に該当する可能性があります。提出情報は厳正に確認し、虚偽が発覚した場合、法的措置（損害賠償請求、警察への相談）を講じる可能性があります。
         </strong>
       </div>
 
       <form id="refundForm" novalidate>
-        <!-- 1) ユーザーID/取引ID（必須・最大50文字） -->
+        <!-- 対象ドメイン（必須） -->
         <label class="field">
-          <span>ユーザーIDまたは取引ID <span class="req">必須</span></span>
-          <input type="text" name="txnId" id="txnId" maxlength="50" required inputmode="latin" autocomplete="off" placeholder="例: 2025-09-16-ABC123" />
-          <small class="error" id="err-txnId" aria-live="polite"></small>
+          <span>対象ドメイン <span class="req">必須</span></span>
+          <input
+            type="text"
+            name="targetDomain"
+            id="targetDomain"
+            required
+            placeholder="例: example.com"
+            inputmode="url"
+            autocomplete="off"
+            value="https://ts-ksato.github.io/sample/"
+          />
+          <small class="hint">URLを貼っても可（自動でドメイン抽出）。サブドメイン可（例: sub.example.com）。</small>
+          <small class="error" id="err-targetDomain" aria-live="polite"></small>
         </label>
 
-        <!-- 2) サービス名（デモは10サイト） -->
+        <!-- サービス名（テキスト、必須） -->
         <label class="field">
           <span>サービス名 <span class="req">必須</span></span>
-          <select name="serviceName" id="serviceName" required>
-            <option value="">選択してください</option>
-            <option>Site1</option>
-            <option>Site2</option>
-            <option>Site3</option>
-            <option>Site4</option>
-            <option>Site5</option>
-            <option>Site6</option>
-            <option>Site7</option>
-            <option>Site8</option>
-            <option>Site9</option>
-            <option>Site10</option>
-          </select>
-          <small class="hint">※ 実運用ではJSONから1000サイト読み込みに拡張可</small>
+          <input type="text" name="serviceName" id="serviceName" required maxlength="100" placeholder="例: Story Land（電子書籍）" />
           <small class="error" id="err-serviceName" aria-live="polite"></small>
         </label>
 
-        <!-- 3) 返金理由 -->
+        <!-- キャリア（必須） -->
+        <label class="field">
+          <span>キャリア <span class="req">必須</span></span>
+          <select name="carrier" id="carrier" required>
+            <option value="">選択してください</option>
+            <option value="docomo">docomo</option>
+            <option value="ahamo">ahamo</option>
+            <option value="au">au</option>
+            <option value="povo">povo</option>
+            <option value="UQmobile">UQmobile</option>
+            <option value="softbank">SoftBank</option>
+            <option value="LINEMO">LINEMO</option>
+          </select>
+          <small class="error" id="err-carrier" aria-live="polite"></small>
+        </label>
+
+        <!-- 対象の決済番号（必須：キャリアに応じてラベル動的表示） -->
+        <label class="field">
+          <span id="paymentIdLabel">対象の決済番号 <span class="req">必須</span></span>
+          <input type="text" name="paymentId" id="paymentId" required placeholder="例: xxxx-xxxx-xxxx" autocomplete="off" />
+          <small class="hint">
+            ※ 不明な場合は確認方法の案内（<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>）をご覧ください。
+          </small>
+          <small class="error" id="err-paymentId" aria-live="polite"></small>
+        </label>
+
+        <!-- 返金理由 -->
         <fieldset class="field">
           <legend>返金理由 <span class="req">必須</span></legend>
           <label class="option"><input type="radio" name="reason" value="未成年による契約" required /> 未成年による契約</label>
@@ -61,7 +83,7 @@
           <small class="error" id="err-reason" aria-live="polite"></small>
         </fieldset>
 
-        <!-- 4) 生年月日（YYYY/MM/DD） 18歳未満のみ有効 -->
+        <!-- 生年月日（18歳未満のみ有効） -->
         <label class="field">
           <span>生年月日（YYYY/MM/DD） <span class="req">必須</span></span>
           <input type="text" name="dob" id="dob" inputmode="numeric" placeholder="例: 2008/03/05" required />
@@ -69,17 +91,31 @@
           <small class="error" id="err-dob" aria-live="polite"></small>
         </label>
 
-        <!-- 5) 親権者/保護者 氏名 -->
+        <!-- 親権者/保護者 氏名 -->
         <label class="field">
           <span>親権者/保護者の氏名 <span class="req">必須</span></span>
           <input type="text" name="guardianName" id="guardianName" maxlength="50" required placeholder="例: 山田 太郎" />
           <small class="error" id="err-guardianName" aria-live="polite"></small>
         </label>
 
-        <!-- 6) 親権者 連絡先（メール or 電話） -->
+        <!-- 未成年との関係（児童相談所等の職員は削除） -->
+        <label class="field">
+          <span>未成年との関係 <span class="req">必須</span></span>
+          <select name="guardianRelation" id="guardianRelation" required>
+            <option value="">選択してください</option>
+            <option>父</option>
+            <option>母</option>
+            <option>祖父母</option>
+            <option>兄弟姉妹</option>
+            <option>後見人</option>
+            <option>その他</option>
+          </select>
+          <small class="error" id="err-guardianRelation" aria-live="polite"></small>
+        </label>
+
+        <!-- 連絡先（メール or 電話） -->
         <fieldset class="field">
           <legend>親権者/保護者の連絡先 <span class="req">必須</span></legend>
-
           <div class="tabs" role="tablist" aria-label="連絡方法">
             <button type="button" class="tab active" data-target="#emailPane" role="tab" aria-selected="true">メール</button>
             <button type="button" class="tab" data-target="#phonePane" role="tab" aria-selected="false">電話</button>
@@ -91,9 +127,7 @@
               <input type="email" name="guardianEmail" id="guardianEmail" placeholder="例: parent@example.com" />
               <small class="error" id="err-guardianEmail" aria-live="polite"></small>
             </label>
-            <!-- 認証リンクの設計例（実装はサーバ側で）
-              例: https://refund.example.com/verify?code=XXXX
-            -->
+            <!-- 例: https://refund.example.com/verify?code=XXXX -->
           </div>
 
           <div id="phonePane" class="tabpane" role="tabpanel" hidden>
@@ -102,28 +136,20 @@
               <input type="tel" name="guardianPhone" id="guardianPhone" placeholder="+81-90-1234-5678" />
               <small class="error" id="err-guardianPhone" aria-live="polite"></small>
             </label>
-
-            <!-- 将来拡張（SMSコード認証）：フロント側の雛形（コメントアウト）
-            <label class="subfield">
-              <span>SMS認証コード</span>
-              <input type="text" name="smsCode" id="smsCode" inputmode="numeric" maxlength="6" placeholder="6桁コード" />
-            </label>
-            -->
+            <!-- 将来拡張: SMSコード入力欄 -->
           </div>
 
           <small class="hint">※ メールか電話のいずれか一方は必須。</small>
         </fieldset>
 
-        <!-- 同意チェックボックス -->
+        <!-- 同意チェック -->
         <label class="agree">
           <input type="checkbox" id="consent" required />
-          <span>
-            私は提出情報の正確性を保証し、虚偽申告が発覚した場合の責任（法的措置を含む）を了承します。
-          </span>
+          <span>私は提出情報の正確性を保証し、虚偽申告が発覚した場合の責任（法的措置を含む）を了承します。</span>
         </label>
         <small class="error" id="err-consent" aria-live="polite"></small>
 
-        <!-- 送信ボタン（同意がないと無効） -->
+        <!-- 送信 -->
         <div class="actions">
           <button id="submitBtn" type="submit" disabled>申請を送信</button>
           <div id="submitNote" class="submit-note" aria-live="polite"></div>
@@ -133,9 +159,8 @@
 
     <section class="card">
       <p class="privacy">
-        <!-- 個人情報保護法の趣旨に基づく明示（12px・グレー） -->
         収集目的：返金申請の処理および不正防止<br>
-        収集情報：生年月日、親権者氏名・連絡先<br>
+        収集情報：生年月日、親権者氏名・連絡先、対象ドメイン、キャリア、対象の決済番号、サービス名<br>
         保管期間：申請処理後3ヶ月で削除<br>
         第三者提供：キャリア決済事業者に年齢確認のため提供する場合あり<br>
         お問い合わせ：support@refund.example.com
@@ -146,7 +171,6 @@
       <small>&copy; 2025 refund.example.com</small>
     </footer>
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
