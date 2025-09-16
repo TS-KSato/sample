@@ -6,34 +6,23 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self';" />
   <meta name="referrer" content="strict-origin" />
   <title>未成年課金返金申請フォーム | refund.example.com</title>
-  <!-- 法対応・セキュリティメモ（実装者向け）
-    - 個人情報保護法: 収集目的/保管期間/第三者提供を本文で明示。入力は最小限。
-    - 消費者契約法: 簡潔UI（2分以内完了想定）。
-    - 刑法246条: 抑止のため注意喚起を冒頭に明示、過度に脅迫的な表現は避ける。
-    - 資金決済法: キャリア決済の検証用に「対象ドメイン」「キャリア」「対象の決済番号」を必須化。
-    - セキュリティ: CSP、入力サニタイゼーション、レート制限、改ざん検知を実装。
-  -->
   <style>
-    /* 消費者契約法: 2分以内で完了できる簡素UI。個人情報保護法: 必要最小限項目＋明示。 */
-
     :root {
-      --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --warn:#ff0000; --primary:#007bff; --focus:#2563eb; --success:#10b981;
+      --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --warn:#b91c1c; --primary:#007bff; --focus:#2563eb; --success:#10b981;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg)}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.6}
 
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-
     .container{max-width:720px;margin:0 auto;padding:16px}
     .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-    .notice{margin-bottom:8px}
-    .warn{color:var(--warn);font-size:16px}
-    
     .page-header{text-align:center;margin-bottom:20px}
     .page-title{color:var(--primary);font-size:24px;margin:0 0 8px 0}
     .page-subtitle{color:var(--muted);font-size:14px;margin:0}
     .security-badge{display:inline-flex;align-items:center;gap:4px;background:#f0f9ff;color:#0369a1;font-size:12px;padding:4px 8px;border-radius:12px;margin-top:8px}
+
+    .notice{margin-bottom:8px;color:var(--muted);font-size:13px;line-height:1.7}
+    .notice strong{color:var(--fg)}
 
     .field{display:block;margin:12px 0}
     .field>span{display:inline-block;margin-bottom:6px;font-weight:600}
@@ -54,9 +43,6 @@
     .tabpane[hidden]{display:none}
     .tabpane.active{display:block}
 
-    .subfield{display:block;margin:8px 0}
-    .subfield span{display:inline-block;margin-bottom:6px}
-
     .agree{display:flex;align-items:flex-start;gap:8px;margin-top:12px}
     .agree input{margin-top:3px}
 
@@ -72,64 +58,43 @@
 
     .privacy{color:#4b5563;font-size:12px;line-height:1.7}
     .footer{text-align:center;color:var(--muted);font-size:12px;padding:16px 0 8px}
-
-    .security-info{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px;margin:12px 0;font-size:12px;color:#0369a1}
-    .security-info h4{margin:0 0 6px 0;font-size:13px}
-    .security-info ul{margin:4px 0;padding-left:16px}
-    .security-info li{margin:2px 0}
-
-    @media (min-width:768px){.actions{justify-content:flex-start}}
   </style>
 </head>
 <body>
   <main class="container" role="main" aria-labelledby="page-title">
     <div class="page-header">
       <h1 id="page-title" class="page-title">未成年課金返金申請フォーム</h1>
-      <p class="page-subtitle">このフォームは未成年による課金の返金申請専用です</p>
+      <p class="page-subtitle">未成年によるご利用について、保護者・親権者さまが返金を申請するためのフォームです</p>
       <div class="security-badge">
         🔒 セキュア送信対応
       </div>
     </div>
 
     <section class="card">
-      <div class="notice" role="note" aria-live="polite">
-        <strong class="warn">
-          虚偽の未成年返金請求は詐欺罪（刑法246条）に該当する可能性があります。提出情報は厳正に確認し、虚偽が発覚した場合、法的措置（損害賠償請求、警察への相談）を講じる可能性があります。
-        </strong>
+      <div class="notice">
+        <strong>ご案内：</strong>  
+        このフォームでは、未成年によるご利用があった場合に、保護者・親権者さまから返金申請を受け付けます。  
+        いただいた内容は、事実確認を行ったうえで適切に対応いたします。<br>
+        内容に虚偽があった場合は、返金対象外となりますのでご了承ください。
       </div>
 
       <form id="refundForm" novalidate>
-        <!-- 隠しフィールド（セキュリティトークン・タイムスタンプ） -->
+        <!-- 隠しフィールド（セキュリティトークン） -->
         <input type="hidden" name="securityToken" id="securityToken" />
         <input type="hidden" name="formTimestamp" id="formTimestamp" />
         <input type="hidden" name="sessionId" id="sessionId" />
 
-        <!-- 対象ドメイン（任意） -->
         <label class="field">
           <span>対象ドメイン（分かる場合のみ）</span>
-          <input
-            type="text"
-            name="targetDomain"
-            id="targetDomain"
-            placeholder="例: example.com"
-            inputmode="url"
-            autocomplete="off"
-            value="example.com"
-            maxlength="253"
-          />
-          <small class="hint">URLを貼っても可。分からない場合は空欄で構いません。</small>
-          <small class="error" id="err-targetDomain" aria-live="polite"></small>
+          <input type="text" name="targetDomain" id="targetDomain" placeholder="例: example.com" inputmode="url" autocomplete="off" maxlength="253" />
+          <small class="hint">URLでも可。不明な場合は空欄でも構いません。</small>
         </label>
 
-        <!-- サービス名（任意） -->
         <label class="field">
           <span>サービス名（分かる場合のみ）</span>
-          <input type="text" name="serviceName" id="serviceName" maxlength="100" placeholder="例:  電子書籍コムなど" />
-          <small class="hint">明細に記載されている名称でも構いません。</small>
-          <small class="error" id="err-serviceName" aria-live="polite"></small>
+          <input type="text" name="serviceName" id="serviceName" maxlength="100" placeholder="例: 電子書籍コムなど" />
         </label>
 
-        <!-- キャリア（必須） -->
         <label class="field">
           <span>キャリア <span class="req">必須</span></span>
           <select name="carrier" id="carrier" required>
@@ -138,88 +103,60 @@
             <option value="au">au（povo、UQ mobile）</option>
             <option value="softbank">SoftBank（LINEMO）</option>
           </select>
-          <small class="error" id="err-carrier" aria-live="polite"></small>
         </label>
 
-        <!-- 対象の決済番号（必須：キャリアに応じてラベル動的表示） -->
         <label class="field">
           <span id="paymentIdLabel">対象の決済番号 <span class="req">必須</span></span>
-          <input type="text" name="paymentId" id="paymentId" required placeholder="例: xxxx-xxxx-xxxx" autocomplete="off" maxlength="50" />
-          <small class="hint" id="paymentIdHint">
-            ※ 不明な場合は確認方法の案内（<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>）をご覧ください。
-          </small>
-          <small class="error" id="err-paymentId" aria-live="polite"></small>
+          <input type="text" name="paymentId" id="paymentId" required placeholder="例: xxxx-xxxx-xxxx" maxlength="50" />
+          <small class="hint" id="paymentIdHint">※ 不明な場合は確認方法をご覧ください。</small>
         </label>
 
-        <!-- 申請内容の確認 -->
         <div class="purpose-confirm">
           <h3>申請内容の確認</h3>
-          <p>以下の内容について確認し、同意の上でチェックしてください。</p>
+          <p>以下にご同意いただいたうえで送信してください。</p>
           <label class="agree">
             <input type="checkbox" name="reasonConfirm" id="reasonConfirm" required />
-            <span>未成年による課金であることを確認し、返金申請いたします</span>
+            <span>未成年による課金であることを確認し、返金申請を行います</span>
           </label>
-          <small class="error" id="err-reasonConfirm" aria-live="polite"></small>
         </div>
 
-        <!-- 生年月日（18歳未満のみ有効） -->
         <label class="field">
           <span>生年月日（YYYY/MM/DD） <span class="req">必須</span></span>
-          <input type="text" name="dob" id="dob" inputmode="numeric" placeholder="例: 2008/03/05" required maxlength="10" />
-          <small class="hint">18歳未満のみ申請可能（当日基準）。未来日・不正な過去年（例: 1900年）は不可。</small>
-          <small class="error" id="err-dob" aria-live="polite"></small>
+          <input type="text" name="dob" id="dob" placeholder="例: 2008/03/05" required maxlength="10" />
         </label>
 
-        <!-- 親権者/保護者 氏名 -->
         <label class="field">
           <span>親権者/保護者の氏名 <span class="req">必須</span></span>
           <input type="text" name="guardianName" id="guardianName" maxlength="50" required placeholder="例: 山田 太郎" />
-          <small class="error" id="err-guardianName" aria-live="polite"></small>
         </label>
 
-        <!-- どこから登録したか（任意・参考情報） -->
-        <label class="field">
-          <span>どこから登録されたか（分かる場合のみ）</span>
-          <input type="text" name="registrationSource" id="registrationSource" maxlength="200" placeholder="例: YouTube広告、Google検索など" />
-          <small class="hint">覚えている範囲で構いません。</small>
-          <small class="error" id="err-registrationSource" aria-live="polite"></small>
-        </label>
-
-        <!-- 連絡先（メール or 電話） -->
         <fieldset class="field">
           <legend>親権者/保護者の連絡先 <span class="req">必須</span></legend>
-          <div class="tabs" role="tablist" aria-label="連絡方法">
-            <button type="button" class="tab active" data-target="#emailPane" role="tab" aria-selected="true">メール</button>
-            <button type="button" class="tab" data-target="#phonePane" role="tab" aria-selected="false">電話</button>
+          <div class="tabs">
+            <button type="button" class="tab active" data-target="#emailPane">メール</button>
+            <button type="button" class="tab" data-target="#phonePane">電話</button>
           </div>
 
-          <div id="emailPane" class="tabpane active" role="tabpanel">
+          <div id="emailPane" class="tabpane active">
             <label class="subfield">
-              <span>メールアドレス（例: example@domain.com）</span>
-              <input type="email" name="guardianEmail" id="guardianEmail" placeholder="例: parent@example.com" maxlength="100" />
-              <small class="error" id="err-guardianEmail" aria-live="polite"></small>
+              <span>メールアドレス</span>
+              <input type="email" name="guardianEmail" id="guardianEmail" maxlength="100" />
             </label>
           </div>
 
-          <div id="phonePane" class="tabpane" role="tabpanel" hidden>
+          <div id="phonePane" class="tabpane" hidden>
             <label class="subfield">
-              <span>電話番号（+81-123-456-7890 形式）</span>
-              <input type="tel" name="guardianPhone" id="guardianPhone" placeholder="+81-90-1234-5678" maxlength="20" />
-              <small class="error" id="err-guardianPhone" aria-live="polite"></small>
+              <span>電話番号</span>
+              <input type="tel" name="guardianPhone" id="guardianPhone" maxlength="20" />
             </label>
           </div>
-
-          <small class="hint">※ メールか電話のいずれか一方は必須。問い合わせ時の連絡先と一致させてください。</small>
         </fieldset>
 
-        <!-- 同意チェック -->
         <label class="agree">
           <input type="checkbox" id="consent" required />
-          <span>私は提出情報の正確性を保証し、虚偽申告が発覚した場合の責任（法的措置を含む）を了承します。</span>
+          <span>記入内容に誤りがないことを確認し、事実確認のうえで対応されることに同意します。</span>
         </label>
-        <small class="error" id="err-consent" aria-live="polite"></small>
 
-        <!-- 送信 -->
         <div class="actions">
           <button id="submitBtn" type="submit" disabled>申請を送信</button>
           <div id="submitNote" class="submit-note" aria-live="polite"></div>
@@ -228,21 +165,9 @@
     </section>
 
     <section class="card">
-      <div class="security-info">
-        <h4>🛡️ セキュリティ対策</h4>
-        <ul>
-          <li>入力データは暗号化されて送信されます</li>
-          <li>不正アクセス・スパム送信を監視しています</li>
-          <li>複数回の送信は制限されています</li>
-          <li>IPアドレス・時刻等のログを記録しています</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card">
       <p class="privacy">
-        収集目的：返金申請の処理および不正防止<br>
-        収集情報：生年月日、親権者氏名・連絡先、対象ドメイン、キャリア、対象の決済番号、サービス名<br>
+        収集目的：返金申請の確認・対応、および不正防止<br>
+        収集情報：生年月日、親権者氏名・連絡先、対象ドメイン、キャリア、決済番号<br>
         保管期間：申請処理後一定期間後に削除<br>
         第三者提供：キャリア決済事業者に年齢確認のため提供する場合あり<br>
         お問い合わせ：support@refund.example.com
@@ -250,388 +175,9 @@
     </section>
 
     <footer class="footer">
-      <small>&copy; 2025 refund.example.com | 複数サイト一元管理システム</small>
+      <small>&copy; 2025 refund.example.com</small>
     </footer>
   </main>
-
-  <script>
-    /* 法と設計・セキュリティメモ
-     - 個人情報保護法: クライアント側のみで処理（GitHub Pages）。サーバ保存なしデモ。
-     - 消費者契約法: 入力5項目、2分以内完了想定。
-     - 刑法246条: 抑止文言を表示。
-     - 資金決済法: 「対象ドメイン」「キャリア」「対象の決済番号」を必須化。
-     - セキュリティ: 入力サニタイゼーション、レート制限、改ざん検知、トークン生成。
-    */
-
-    const $ = (s) => document.querySelector(s);
-
-    // セキュリティ強化: 初期化時にセキュリティトークンとセッションIDを生成
-    (function initSecurity(){
-      const generateToken = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
-      const sessionId = 'session_' + generateToken();
-      const securityToken = 'token_' + generateToken();
-      const timestamp = Date.now();
-      
-      $("#securityToken").value = securityToken;
-      $("#formTimestamp").value = timestamp;
-      $("#sessionId").value = sessionId;
-      
-      // セッションストレージに保存（改ざん検知用）
-      sessionStorage.setItem('formSession', JSON.stringify({
-        sessionId: sessionId,
-        securityToken: securityToken,
-        timestamp: timestamp
-      }));
-    })();
-
-    // 入力値サニタイゼーション
-    function sanitizeInput(input) {
-      return input.toString()
-        .replace(/[<>\"'&]/g, function(match) {
-          const map = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'};
-          return map[match];
-        })
-        .trim()
-        .substring(0, 1000); // 最大長制限
-    }
-
-    // 高度なレート制限（複数の指標で判定）
-    function checkAdvancedRateLimit() {
-      const now = Date.now();
-      const hour = 3600000;
-      const day = 86400000;
-      
-      // 時間別制限
-      let hourlySubmissions = [];
-      let dailySubmissions = [];
-      
-      try {
-        hourlySubmissions = JSON.parse(sessionStorage.getItem('hourly_submissions') || '[]');
-        dailySubmissions = JSON.parse(sessionStorage.getItem('daily_submissions') || '[]');
-      } catch(e) {
-        hourlySubmissions = [];
-        dailySubmissions = [];
-      }
-      
-      // 古いエントリを削除
-      hourlySubmissions = hourlySubmissions.filter(ts => now - ts < hour);
-      dailySubmissions = dailySubmissions.filter(ts => now - ts < day);
-      
-      // 制限チェック
-      if (hourlySubmissions.length >= 3) {
-        alert("1時間に3回以上の申請が確認されました。しばらく時間をおいてから再度お試しください。");
-        return false;
-      }
-      
-      if (dailySubmissions.length >= 10) {
-        alert("1日の申請上限に達しました。明日以降にお試しください。");
-        return false;
-      }
-      
-      // 記録
-      hourlySubmissions.push(now);
-      dailySubmissions.push(now);
-      
-      sessionStorage.setItem('hourly_submissions', JSON.stringify(hourlySubmissions));
-      sessionStorage.setItem('daily_submissions', JSON.stringify(dailySubmissions));
-      
-      return true;
-    }
-
-    /** タブ切替（メール/電話） */
-    (function setupTabs(){
-      const tabs = document.querySelectorAll(".tab");
-      tabs.forEach(tab=>{
-        tab.addEventListener("click",()=>{
-          tabs.forEach(t=>t.classList.remove("active"));
-          tab.classList.add("active");
-          const targetSel = tab.getAttribute("data-target");
-          document.querySelectorAll(".tabpane").forEach(p=>{
-            if("#"+p.id===targetSel){ p.hidden=false; p.classList.add("active"); }
-            else { p.hidden=true; p.classList.remove("active"); }
-          });
-        });
-      });
-    })();
-
-    /** 同意ゲート（両方のチェックボックスが必要） */
-    (function consentGate(){
-      const consent=$("#consent"), reasonConfirm=$("#reasonConfirm"), btn=$("#submitBtn");
-      if(!consent||!reasonConfirm||!btn) return;
-      const update=()=>btn.disabled=!(consent.checked && reasonConfirm.checked);
-      consent.addEventListener("change",update);
-      reasonConfirm.addEventListener("change",update);
-      update();
-    })();
-
-    /** キャリア選択に応じてラベルを動的変更（詳細補足版） */
-    (function carrierDynamicLabel(){
-      const carrier=$("#carrier"), label=$("#paymentIdLabel"), hint=$("#paymentIdHint");
-      const update=()=>{
-        const v=carrier.value;
-        if(v==="docomo"){
-          label.innerHTML='対象の決済番号（<b>docomo・ahamo: 決済番号</b>） <span class="req">必須</span>';
-          hint.innerHTML='※ 12桁の数字（例: 123456789012）。spモード決済の明細やMy docomoで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
-        }else if(v==="au"){
-          label.innerHTML='対象の決済番号（<b>au・povo・UQ mobile: 継続課金ID</b>） <span class="req">必須</span>';
-          hint.innerHTML='※ 11桁の数字（例: 12345678901）。auかんたん決済の明細やMy auで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
-        }else if(v==="softbank"){
-          label.innerHTML='対象の決済番号（<b>SoftBank・LINEMO: 注文番号</b>） <span class="req">必須</span>';
-          hint.innerHTML='※ 14桁の英数字または数字（例: AB123456789012、12345678901234）。ソフトバンクまとめて支払いの明細やMy SoftBankで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
-        }else{
-          label.innerHTML='対象の決済番号 <span class="req">必須</span>';
-          hint.innerHTML='※ キャリアを選択すると、詳しい説明が表示されます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
-        }
-      };
-      if(carrier){ carrier.addEventListener("change",update); update(); }
-    })();
-
-    /** 入力検証（強化版） */
-    function validateForm(){
-      // エラーメッセージクリア
-      [
-        "#err-targetDomain","#err-serviceName","#err-carrier","#err-paymentId",
-        "#err-reasonConfirm","#err-dob","#err-guardianName",
-        "#err-guardianEmail","#err-guardianPhone","#err-consent"
-      ].forEach(sel=>{ const el=$(sel); if(el) el.textContent=""; });
-
-      // 値の取得とサニタイゼーション
-      const targetDomain = sanitizeInput($("#targetDomain").value);
-      const serviceName = sanitizeInput($("#serviceName").value);
-      const carrier = sanitizeInput($("#carrier").value);
-      const paymentId = sanitizeInput($("#paymentId").value);
-      const reasonConfirm = $("#reasonConfirm").checked;
-      const dob = sanitizeInput($("#dob").value);
-      const guardianName = sanitizeInput($("#guardianName").value);
-      const registrationSource = sanitizeInput($("#registrationSource").value);
-      const guardianEmail = sanitizeInput($("#guardianEmail").value);
-      const guardianPhone = sanitizeInput($("#guardianPhone").value);
-      const consent = $("#consent").checked;
-
-      let ok = true;
-
-      // セキュリティ検証
-      const storedSession = JSON.parse(sessionStorage.getItem('formSession') || '{}');
-      if ($("#securityToken").value !== storedSession.securityToken) {
-        alert("セキュリティエラーが発生しました。ページをリロードしてください。");
-        return false;
-      }
-
-      // 対象ドメイン（任意だが、入力された場合は検証）
-      if(targetDomain) {
-        const extracted = extractHostname(targetDomain);
-        if(!extracted){ ok=false; $("#err-targetDomain").textContent="ドメイン形式が正しくありません。"; }
-        else if(!isValidDomain(extracted)){ ok=false; $("#err-targetDomain").textContent="ドメイン形式が正しくありません。"; }
-      }
-
-      // サービス名（任意だが、入力された場合は長さチェック）
-      if(serviceName && serviceName.length>100){ ok=false; $("#err-serviceName").textContent="100文字以内で入力してください。"; }
-
-      // キャリア
-      if(!carrier){ ok=false; $("#err-carrier").textContent="キャリアを選択してください。"; }
-      else if(!['docomo','au','softbank'].includes(carrier)){ ok=false; $("#err-carrier").textContent="正しいキャリアを選択してください。"; }
-
-      // 決済番号（キャリア別詳細検証）
-      if(!paymentId){ ok=false; $("#err-paymentId").textContent="対象の決済番号を入力してください。"; }
-      else {
-        let validFormat = false;
-        if(carrier === "docomo" && /^\d{12}$/.test(paymentId)) validFormat = true;
-        else if(carrier === "au" && /^\d{11}$/.test(paymentId)) validFormat = true;
-        else if(carrier === "softbank" && (/^[A-Za-z0-9]{14}$/.test(paymentId) || /^\d{14}$/.test(paymentId))) validFormat = true;
-        else if(!carrier && /^[A-Za-z0-9\-_]{3,50}$/.test(paymentId)) validFormat = true; // キャリア未選択時は緩い検証
-        
-        if(!validFormat) {
-          if(carrier === "docomo") ok=false, $("#err-paymentId").textContent="docomoの決済番号は12桁の数字です。";
-          else if(carrier === "au") ok=false, $("#err-paymentId").textContent="auの継続課金IDは11桁の数字です。";
-          else if(carrier === "softbank") ok=false, $("#err-paymentId").textContent="SoftBankの注文番号は14桁の英数字または数字です。";
-          else ok=false, $("#err-paymentId").textContent="決済番号の形式を確認してください。";
-        }
-      }
-
-      // 申請内容確認
-      if(!reasonConfirm){ ok=false; $("#err-reasonConfirm").textContent="申請内容の確認にチェックしてください。"; }
-
-      // 生年月日
-      const dobResult = validateDOB(dob);
-      if(!dobResult.valid){ ok=false; $("#err-dob").textContent=dobResult.message; }
-      else if(!dobResult.isMinor){ ok=false; $("#err-dob").textContent="未成年者に該当しません。"; }
-
-      // 親権者氏名
-      if(!guardianName){ ok=false; $("#err-guardianName").textContent="親権者/保護者の氏名を入力してください。"; }
-      else if(!/^[ぁ-んァ-ヶ一-龠a-zA-Z\s　]+$/.test(guardianName)){ ok=false; $("#err-guardianName").textContent="氏名は日本語または英語で入力してください。"; }
-
-      // 連絡先（メール or 電話）
-      const emailOk = guardianEmail ? validateEmail(guardianEmail) : false;
-      const phoneOk = guardianPhone ? validateJPPhone(guardianPhone) : false;
-      if(!guardianEmail && !guardianPhone){
-        ok=false;
-        $("#err-guardianEmail").textContent="メールまたは電話のいずれかを入力してください。";
-        $("#err-guardianPhone").textContent="メールまたは電話のいずれかを入力してください。";
-      }else{
-        if(guardianEmail && !emailOk){ ok=false; $("#err-guardianEmail").textContent="メール形式が正しくありません。"; }
-        if(guardianPhone && !phoneOk){ ok=false; $("#err-guardianPhone").textContent="電話番号は +81-123-456-7890 形式で入力してください。"; }
-      }
-
-      // 同意
-      if(!consent){ ok=false; $("#err-consent").textContent="同意が必要です。"; }
-
-      return ok;
-    }
-
-    /** ドメイン抽出・検証（強化版） */
-    function extractHostname(input){
-      if(!input) return "";
-      let s = input.trim();
-      try{
-        if(/^https?:\/\//i.test(s)){ const u=new URL(s); return u.hostname; }
-        s = s.replace(/^[a-z]+:\/\//i,"").split("/")[0];
-        return s;
-      }catch{ return ""; }
-    }
-    
-    function isValidDomain(host){
-      if(!host || host.length > 253) return false;
-      const re=/^(?=.{1,253}$)(?:[A-Za-z0-9](?:[A-Za-z0-9\-]{0,61}[A-Za-z0-9])\.)+[A-Za-z]{2,}$/;
-      return re.test(host) && !host.includes('..') && !host.startsWith('-') && !host.endsWith('-');
-    }
-
-    /** DOB 検証（強化版） */
-    function validateDOB(s){
-      if(!/^\d{4}\/\d{2}\/\d{2}$/.test(s)){
-        return {valid:false,message:"生年月日は YYYY/MM/DD 形式で入力してください。",isMinor:false};
-      }
-      const [y,m,d]=s.split("/").map(Number);
-      if(y<1990||y>2020||m<1||m>12||d<1||d>31){
-        return {valid:false,message:"生年月日を正しく入力してください（1990-2020年の範囲）。",isMinor:false};
-      }
-      const dt=new Date(y,m-1,d);
-      if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d){
-        return {valid:false,message:"存在しない日付です。",isMinor:false};
-      }
-      const today=new Date();
-      if(dt>today) return {valid:false,message:"未来の日付は指定できません。",isMinor:false};
-      const threshold=new Date(today.getFullYear()-18,today.getMonth(),today.getDate());
-      const isMinor = dt>threshold;
-      return {valid:true,message:"",isMinor};
-    }
-
-    /** Email / Phone（強化版） */
-    function validateEmail(s){ 
-      return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(s) && s.length <= 100; 
-    }
-    
-    function validateJPPhone(s){ 
-      return /^\+81-\d{1,4}-\d{1,4}-\d{3,4}$/.test(s) && s.length <= 20; 
-    }
-
-    /** 送信（セキュリティ強化版） */
-    async function submitForm(e){
-      e.preventDefault();
-      
-      // レート制限チェック
-      if(!checkAdvancedRateLimit()) return;
-      
-      if(!validateForm()) return;
-
-      $("#submitNote").textContent="送信処理中…";
-
-      const data = collectFormData();
-      
-      // データハッシュ生成（改ざん検知用）
-      const dataString = JSON.stringify(data);
-      const timestamp = Date.now();
-      const hash = await simpleHash(dataString + timestamp);
-
-      const recipient="support@refund.example.com";
-      const subject=encodeURIComponent(`【未成年返金申請】${data.serviceName} / ${data.carrier} / ${data.paymentId}`);
-      const body=encodeURIComponent([
-        "=== 未成年課金返金申請 ===",
-        `申請日時: ${new Date().toLocaleString()}`,
-        `セッションID: ${data.sessionId}`,
-        `データハッシュ: ${hash}`,
-        "",
-        "【申請内容】",
-        `対象ドメイン: ${data.targetDomain}`,
-        `サービス名: ${data.serviceName}`,
-        `キャリア: ${data.carrier}`,
-        `対象の決済番号: ${data.paymentId}`,
-        `生年月日: ${data.dob}`,
-        `親権者氏名: ${data.guardianName}`,
-        `親権者連絡先: ${data.guardianEmail || data.guardianPhone}`,
-        "",
-        "【技術情報】",
-        `UA: ${navigator.userAgent}`,
-        `ページ: ${location.href}`,
-        `送信時刻: ${timestamp}`,
-        "",
-        "※このメールは自動生成されています"
-      ].join("\n"));
-      
-      const mailtoURL=`mailto:${recipient}?subject=${subject}&body=${body}`;
-      window.location.href=mailtoURL;
-
-      $("#submitNote").textContent="申請を受け付けました。通常3〜5営業日以内に結果を通知します。";
-      $("#refundForm").reset();
-      $("#submitBtn").disabled=true;
-      
-      // セキュリティログ記録
-      console.log(`[SECURITY] Form submitted - Session: ${data.sessionId}, Hash: ${hash}, Time: ${timestamp}`);
-    }
-
-    /** 簡易ハッシュ関数 */
-    async function simpleHash(str) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
-    }
-
-    /** 値の収集（セキュリティ強化版） */
-    function collectFormData(){
-      const targetDomain = $("#targetDomain").value.trim();
-      return {
-        targetDomain: targetDomain ? extractHostname(sanitizeInput(targetDomain)) : "",
-        serviceName: sanitizeInput($("#serviceName").value),
-        carrier: sanitizeInput($("#carrier").value),
-        paymentId: sanitizeInput($("#paymentId").value),
-        dob: sanitizeInput($("#dob").value),
-        guardianName: sanitizeInput($("#guardianName").value),
-        registrationSource: sanitizeInput($("#registrationSource").value),
-        guardianEmail: sanitizeInput($("#guardianEmail").value),
-        guardianPhone: sanitizeInput($("#guardianPhone").value),
-        securityToken: $("#securityToken").value,
-        sessionId: $("#sessionId").value,
-        formTimestamp: $("#formTimestamp").value
-      };
-    }
-
-    /** 入力補助 */
-    $("#dob").addEventListener("blur",()=>{
-      const r=validateDOB(sanitizeInput($("#dob").value));
-      $("#err-dob").textContent=r.valid?"":r.message;
-    });
-
-    // セキュリティ強化: 不正な操作の検知
-    document.addEventListener('contextmenu', function(e) {
-      // 右クリック制限は削除（ユーザビリティ重視）
-    });
-
-    // セキュリティ強化: DevTools検知（簡易版）
-    let devtools = {open: false};
-    setInterval(function() {
-      if (window.outerHeight - window.innerHeight > 200) {
-        if (!devtools.open) {
-          devtools.open = true;
-          console.log('[SECURITY] Developer tools detected');
-        }
-      } else {
-        devtools.open = false;
-      }
-    }, 500);
-
-    /** 送信 */
-    $("#refundForm").addEventListener("submit",submitForm);
-  </script>
+  <script src="form.js"></script>
 </body>
 </html>
