@@ -104,28 +104,28 @@
         <input type="hidden" name="formTimestamp" id="formTimestamp" />
         <input type="hidden" name="sessionId" id="sessionId" />
 
-        <!-- 対象ドメイン（必須） -->
+        <!-- 対象ドメイン（任意） -->
         <label class="field">
-          <span>対象ドメイン <span class="req">必須</span></span>
+          <span>対象ドメイン（分かる場合のみ）</span>
           <input
             type="text"
             name="targetDomain"
             id="targetDomain"
-            required
             placeholder="例: example.com"
             inputmode="url"
             autocomplete="off"
             value="example.com"
             maxlength="253"
           />
-          <small class="hint">URLを貼っても可（自動でドメイン抽出）。サブドメイン可（例: sub.example.com）。</small>
+          <small class="hint">URLを貼っても可（自動でドメイン抽出）。分からない場合は空欄で構いません。</small>
           <small class="error" id="err-targetDomain" aria-live="polite"></small>
         </label>
 
-        <!-- サービス名（テキスト、必須） -->
+        <!-- サービス名（任意） -->
         <label class="field">
-          <span>サービス名 <span class="req">必須</span></span>
-          <input type="text" name="serviceName" id="serviceName" required maxlength="100" placeholder="例: Story Land（電子書籍）" />
+          <span>サービス名（分かる場合のみ）</span>
+          <input type="text" name="serviceName" id="serviceName" maxlength="100" placeholder="例: パズル&ドラゴンズ、Fate/Grand Order、ピッコマ など" />
+          <small class="hint">ゲーム名、アプリ名、サイト名など。明細に記載されている名称でも構いません。</small>
           <small class="error" id="err-serviceName" aria-live="polite"></small>
         </label>
 
@@ -145,7 +145,7 @@
         <label class="field">
           <span id="paymentIdLabel">対象の決済番号 <span class="req">必須</span></span>
           <input type="text" name="paymentId" id="paymentId" required placeholder="例: xxxx-xxxx-xxxx" autocomplete="off" maxlength="50" />
-          <small class="hint">
+          <small class="hint" id="paymentIdHint">
             ※ 不明な場合は確認方法の案内（<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>）をご覧ください。
           </small>
           <small class="error" id="err-paymentId" aria-live="polite"></small>
@@ -175,6 +175,14 @@
           <span>親権者/保護者の氏名 <span class="req">必須</span></span>
           <input type="text" name="guardianName" id="guardianName" maxlength="50" required placeholder="例: 山田 太郎" />
           <small class="error" id="err-guardianName" aria-live="polite"></small>
+        </label>
+
+        <!-- どこから登録したか（任意・参考情報） -->
+        <label class="field">
+          <span>どこから登録・課金されたか（分かる場合のみ）</span>
+          <input type="text" name="registrationSource" id="registrationSource" maxlength="200" placeholder="例: YouTube広告、Google検索、友達の紹介、アプリストア など" />
+          <small class="hint">今後の参考とさせていただきます。広告、検索、SNS、友達紹介など、覚えている範囲で構いません。</small>
+          <small class="error" id="err-registrationSource" aria-live="polite"></small>
         </label>
 
         <!-- 連絡先（メール or 電話） -->
@@ -356,19 +364,23 @@
       update();
     })();
 
-    /** キャリア選択に応じてラベルを動的変更 */
+    /** キャリア選択に応じてラベルを動的変更（詳細補足版） */
     (function carrierDynamicLabel(){
-      const carrier=$("#carrier"), label=$("#paymentIdLabel");
+      const carrier=$("#carrier"), label=$("#paymentIdLabel"), hint=$("#paymentIdHint");
       const update=()=>{
         const v=carrier.value;
         if(v==="docomo"){
           label.innerHTML='対象の決済番号（<b>docomo・ahamo: 決済番号</b>） <span class="req">必須</span>';
+          hint.innerHTML='※ 12桁の数字（例: 123456789012）。spモード決済の明細やMy docomoで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
         }else if(v==="au"){
           label.innerHTML='対象の決済番号（<b>au・povo・UQ mobile: 継続課金ID</b>） <span class="req">必須</span>';
+          hint.innerHTML='※ 11桁の数字（例: 12345678901）。auかんたん決済の明細やMy auで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
         }else if(v==="softbank"){
           label.innerHTML='対象の決済番号（<b>SoftBank・LINEMO: 注文番号</b>） <span class="req">必須</span>';
+          hint.innerHTML='※ 14桁の英数字または数字（例: AB123456789012、12345678901234）。ソフトバンクまとめて支払いの明細やMy SoftBankで確認できます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
         }else{
           label.innerHTML='対象の決済番号 <span class="req">必須</span>';
+          hint.innerHTML='※ キャリアを選択すると、詳しい説明が表示されます。不明な場合は<a href="https://334.jp" target="_blank" rel="noopener">334.jp</a>をご覧ください。';
         }
       };
       if(carrier){ carrier.addEventListener("change",update); update(); }
@@ -391,6 +403,7 @@
       const reasonConfirm = $("#reasonConfirm").checked;
       const dob = sanitizeInput($("#dob").value);
       const guardianName = sanitizeInput($("#guardianName").value);
+      const registrationSource = sanitizeInput($("#registrationSource").value);
       const guardianEmail = sanitizeInput($("#guardianEmail").value);
       const guardianPhone = sanitizeInput($("#guardianPhone").value);
       const consent = $("#consent").checked;
@@ -404,23 +417,35 @@
         return false;
       }
 
-      // 対象ドメイン
-      const extracted = extractHostname(targetDomain);
-      if(!extracted){ ok=false; $("#err-targetDomain").textContent="対象ドメインを正しく入力してください（例: example.com）。"; }
-      else if(!isValidDomain(extracted)){ ok=false; $("#err-targetDomain").textContent="ドメイン形式が正しくありません。"; }
+      // 対象ドメイン（任意だが、入力された場合は検証）
+      if(targetDomain) {
+        const extracted = extractHostname(targetDomain);
+        if(!extracted){ ok=false; $("#err-targetDomain").textContent="ドメイン形式が正しくありません。"; }
+        else if(!isValidDomain(extracted)){ ok=false; $("#err-targetDomain").textContent="ドメイン形式が正しくありません。"; }
+      }
 
-      // サービス名
-      if(!serviceName){ ok=false; $("#err-serviceName").textContent="サービス名を入力してください。"; }
-      else if(serviceName.length>100){ ok=false; $("#err-serviceName").textContent="100文字以内で入力してください。"; }
+      // サービス名（任意だが、入力された場合は長さチェック）
+      if(serviceName && serviceName.length>100){ ok=false; $("#err-serviceName").textContent="100文字以内で入力してください。"; }
 
       // キャリア
       if(!carrier){ ok=false; $("#err-carrier").textContent="キャリアを選択してください。"; }
       else if(!['docomo','au','softbank'].includes(carrier)){ ok=false; $("#err-carrier").textContent="正しいキャリアを選択してください。"; }
 
-      // 決済番号（厳格化）
+      // 決済番号（キャリア別詳細検証）
       if(!paymentId){ ok=false; $("#err-paymentId").textContent="対象の決済番号を入力してください。"; }
-      else if(!/^[A-Za-z0-9\-_]{3,50}$/.test(paymentId)){
-        ok=false; $("#err-paymentId").textContent="決済番号の形式が正しくありません（英数字・ハイフン・アンダースコア、3-50文字）。";
+      else {
+        let validFormat = false;
+        if(carrier === "docomo" && /^\d{12}$/.test(paymentId)) validFormat = true;
+        else if(carrier === "au" && /^\d{11}$/.test(paymentId)) validFormat = true;
+        else if(carrier === "softbank" && (/^[A-Za-z0-9]{14}$/.test(paymentId) || /^\d{14}$/.test(paymentId))) validFormat = true;
+        else if(!carrier && /^[A-Za-z0-9\-_]{3,50}$/.test(paymentId)) validFormat = true; // キャリア未選択時は緩い検証
+        
+        if(!validFormat) {
+          if(carrier === "docomo") ok=false, $("#err-paymentId").textContent="docomoの決済番号は12桁の数字です。";
+          else if(carrier === "au") ok=false, $("#err-paymentId").textContent="auの継続課金IDは11桁の数字です。";
+          else if(carrier === "softbank") ok=false, $("#err-paymentId").textContent="SoftBankの注文番号は14桁の英数字または数字です。";
+          else ok=false, $("#err-paymentId").textContent="決済番号の形式を確認してください。";
+        }
       }
 
       // 申請内容確認
@@ -564,13 +589,15 @@
 
     /** 値の収集（セキュリティ強化版） */
     function collectFormData(){
+      const targetDomain = $("#targetDomain").value.trim();
       return {
-        targetDomain: extractHostname(sanitizeInput($("#targetDomain").value)),
+        targetDomain: targetDomain ? extractHostname(sanitizeInput(targetDomain)) : "",
         serviceName: sanitizeInput($("#serviceName").value),
         carrier: sanitizeInput($("#carrier").value),
         paymentId: sanitizeInput($("#paymentId").value),
         dob: sanitizeInput($("#dob").value),
         guardianName: sanitizeInput($("#guardianName").value),
+        registrationSource: sanitizeInput($("#registrationSource").value),
         guardianEmail: sanitizeInput($("#guardianEmail").value),
         guardianPhone: sanitizeInput($("#guardianPhone").value),
         securityToken: $("#securityToken").value,
